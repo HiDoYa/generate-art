@@ -1,5 +1,6 @@
 from keras.models import Sequential
 from keras.layers.convolutional import Conv2D
+from keras.layers.convolutional import MaxPooling2D
 from keras.layers.convolutional import Conv2DTranspose
 from keras.layers import BatchNormalization
 from keras.layers import LeakyReLU
@@ -19,23 +20,23 @@ class Models:
         model.add(Reshape((8, 8, 1024)))
         model.add(LeakyReLU())
 
-        model.add(Conv2DTranspose(512, 16, strides=(2, 2), padding="same"))
+        model.add(Conv2DTranspose(512, 5, strides=(2, 2), padding="same"))
         model.add(BatchNormalization())
         model.add(LeakyReLU())
         
-        model.add(Conv2DTranspose(256, 32, strides=(2, 2), padding="same"))
+        model.add(Conv2DTranspose(256, 5, strides=(2, 2), padding="same"))
         model.add(BatchNormalization())
         model.add(LeakyReLU())
 
-        model.add(Conv2DTranspose(128, 64, strides=(2, 2), padding="same"))
+        model.add(Conv2DTranspose(128, 5, strides=(2, 2), padding="same"))
         model.add(BatchNormalization())
         model.add(LeakyReLU())
 
-        model.add(Conv2DTranspose(64, 128, strides=(2, 2), padding="same"))
+        model.add(Conv2DTranspose(64, 5, strides=(2, 2), padding="same"))
         model.add(BatchNormalization())
         model.add(LeakyReLU())
 
-        model.add(Conv2DTranspose(3, 128, strides=(1, 1), padding="same"))
+        model.add(Conv2DTranspose(3, 5, strides=(1, 1), padding="same"))
         model.add(Activation("tanh"))
 
         if weightsPath is not None:
@@ -48,23 +49,23 @@ class Models:
         model = Sequential()
         inputShape = (imgRows, imgCols, numChannels)
 
-        model.add(Conv2D(64, 64, strides=(2, 2), padding="same", input_shape=inputShape))
+        model.add(Conv2D(64, 5, strides=(2, 2), padding="same", input_shape=inputShape))
         model.add(BatchNormalization())
         model.add(LeakyReLU())
 
-        model.add(Conv2D(128, 32, strides=(2, 2), padding="same"))
+        model.add(Conv2D(128, 5, strides=(2, 2), padding="same"))
         model.add(BatchNormalization())
         model.add(LeakyReLU())
 
-        model.add(Conv2D(256, 16, strides=(1, 1), padding="same"))
+        model.add(Conv2D(256, 5, strides=(1, 1), padding="same"))
         model.add(BatchNormalization())
         model.add(LeakyReLU())
 
-        model.add(Conv2D(512, 16, strides=(2, 2), padding="same"))
+        model.add(Conv2D(512, 5, strides=(2, 2), padding="same"))
         model.add(BatchNormalization())
         model.add(LeakyReLU())
 
-        model.add(Conv2D(1024, 8, strides=(2, 2), padding="same"))
+        model.add(Conv2D(1024, 5, strides=(2, 2), padding="same"))
         model.add(BatchNormalization())
         model.add(LeakyReLU())
 
