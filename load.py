@@ -16,7 +16,4 @@ class Load:
         # Labels (all real)
         y = [1] * len(X)
 
-        # Randomly sort and split into train and test sets
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)
-
-        return ((X_train, y_train), (X_test, y_test))
+        return (X, y)
