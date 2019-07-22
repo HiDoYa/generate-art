@@ -20,24 +20,26 @@ class Models:
         model.add(Reshape((8, 8, 1024)))
         model.add(LeakyReLU())
 
-        model.add(Conv2DTranspose(512, 5, strides=(2, 2), padding="same"))
+        model.add(Conv2DTranspose(512, kernel_size=5, strides=2, padding="same"))
         model.add(BatchNormalization())
         model.add(LeakyReLU())
         
-        model.add(Conv2DTranspose(256, 5, strides=(2, 2), padding="same"))
+        model.add(Conv2DTranspose(256, kernel_size=5, strides=2, padding="same"))
         model.add(BatchNormalization())
         model.add(LeakyReLU())
 
-        model.add(Conv2DTranspose(128, 5, strides=(2, 2), padding="same"))
+        model.add(Conv2DTranspose(128, kernel_size=5, strides=2, padding="same"))
         model.add(BatchNormalization())
         model.add(LeakyReLU())
 
-        model.add(Conv2DTranspose(64, 5, strides=(2, 2), padding="same"))
+        model.add(Conv2DTranspose(64, kernel_size=5, strides=2, padding="same"))
         model.add(BatchNormalization())
         model.add(LeakyReLU())
 
-        model.add(Conv2DTranspose(3, 5, strides=(1, 1), padding="same"))
+        model.add(Conv2DTranspose(3, kernel_size=5, strides=1, padding="same"))
         model.add(Activation("tanh"))
+
+        model.summary()
 
         if weightsPath is not None:
             model.load_weights(weightsPath)
@@ -49,29 +51,31 @@ class Models:
         model = Sequential()
         inputShape = (imgRows, imgCols, numChannels)
 
-        model.add(Conv2D(64, 5, strides=(2, 2), padding="same", input_shape=inputShape))
+        model.add(Conv2D(64, kernel_size=5, strides=2, padding="same", input_shape=inputShape))
         model.add(BatchNormalization())
         model.add(LeakyReLU())
 
-        model.add(Conv2D(128, 5, strides=(2, 2), padding="same"))
+        model.add(Conv2D(128, kernel_size=5, strides=2, padding="same"))
         model.add(BatchNormalization())
         model.add(LeakyReLU())
 
-        model.add(Conv2D(256, 5, strides=(1, 1), padding="same"))
+        model.add(Conv2D(256, kernel_size=5, strides=1, padding="same"))
         model.add(BatchNormalization())
         model.add(LeakyReLU())
 
-        model.add(Conv2D(512, 5, strides=(2, 2), padding="same"))
+        model.add(Conv2D(512, kernel_size=5, strides=2, padding="same"))
         model.add(BatchNormalization())
         model.add(LeakyReLU())
 
-        model.add(Conv2D(1024, 5, strides=(2, 2), padding="same"))
+        model.add(Conv2D(1024, kernel_size=5, strides=2, padding="same"))
         model.add(BatchNormalization())
         model.add(LeakyReLU())
 
         model.add(Flatten())
         model.add(Dense(1))
         model.add(Activation("sigmoid"))
+
+        model.summary()
 
         if weightsPath is not None:
             model.load_weights(weightsPath)
