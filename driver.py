@@ -5,6 +5,7 @@ from keras.utils import np_utils
 from keras import backend as K
 from load import Load
 from dcgan_model import Models
+from sklearn.utils import shuffle
 import numpy as np
 import argparse
 import cv2
@@ -41,11 +42,10 @@ gWeightsPath = "output/" + args["weights"] + ".gener" + ".hdf5"
 dWeightsPath = "output/" + args["weights"] + ".discrim" + ".hdf5"
 
 # Load data
-(_X, _y) = Load.load_data()
+_X = Load.load_data()
 
 # Convert to np arrays
 X = np.array(_X)
-y = np.array(_y)
 
 # Scale data to [-1, 1] range
 X = (X.astype("float32") - 127.5) / 127.5
@@ -53,7 +53,7 @@ X = (X.astype("float32") - 127.5) / 127.5
 # Initialize optimizer and model
 print("Loading model...")
 loadPath = args["load_model"] > 0 or args["train_model"] > 0
-opt = SGD(lr=0.01, momentum=0.9, nesterov=True)
+opt = SGD(lr=0.005, momentum=0.9, nesterov=True)
 modelG = Models.buildGenerator(
     vectSize=100,
     weightsPath=gWeightsPath if loadPath else None)
@@ -62,38 +62,31 @@ modelD = Models.buildDiscriminator(
     weightsPath=dWeightsPath if loadPath else None)
 
 # Generator
-modelG.compile(loss="binary_crossentropy", optimizer=opt)
+modelG.compile(loss="binary_crossentropy", optimizer="SGD")
 
 # Discriminator
 modelD.compile(loss="binary_crossentropy", optimizer=opt)
 
 # Discriminator on top of generator
-modelDG = Sequential()
-modelDG.add(modelG)
+modelGD = Sequential()
+modelGD.add(modelG)
 modelD.trainable = False
-modelDG.add(modelD)
-modelDG.compile(loss="binary_crossentropy", optimizer=opt)
+modelGD.add(modelD)
+modelGD.compile(loss="binary_crossentropy", optimizer=opt)
 
 # Train (only if not loading model)
-batchSize = 32
+batchSize = 64
 outputTime = 10
 epochs = 1000
+noise_for_images = np.random.uniform(-1, 1, size=(batchSize, 100))
 train = args["load_model"] < 0
 if train:
-    # 100 epochs
     for epoch in range(epochs):
         numBatches = int(X.shape[0] / batchSize)
-        for index in range(numBatches):
-            # Random noise of vector 100 (batchSize number of them)
-            noise = np.random.uniform(-1, 1, size=(batchSize, 100))
-
-            # Generate image, and give it label 0.
-            X_fake = modelG.predict(noise)
-            y_fake = [0] * X_fake.shape[0]
-
+        for index in range(numBatches): 
             # Output generated images every number of epochs
             if index % outputTime == 0:
-                image = all_images(X_fake)
+                image = all_images(modelG.predict(noise_for_images))
                 cv2.imwrite("images/art/" + str(epoch) + '_' + str(index) + ".jpg", image)
 
                 if not os.path.exists("output"):
@@ -101,25 +94,36 @@ if train:
                 modelD.save_weights(dWeightsPath)
                 modelG.save_weights(gWeightsPath)
 
-            # Select current batch of real images
+            # Random noise of vector 100 (batchSize number of them)
+            noiseD = np.random.uniform(-1, 1, size=(batchSize, 100))
+
+            # Select current batch of real images and generate fkae images
             # Note: y_current is just a vectors of 1s
-            X_real = X[index * numBatches:(index + 1) * numBatches]
-            y_real = y[index * numBatches:(index + 1) * numBatches]
+            X_real = X[index * batchSize:(index + 1) * batchSize]
+            X_fake = modelG.predict_on_batch(noiseD)
+            y_real = [1] * batchSize
+            y_fake = [0] * batchSize
 
             # Add X_train and y_train
-            X_current = np.concatenate([X_real, X_fake])
-            y_current = np.concatenate([y_real, y_fake])
+            _X_current = np.concatenate([X_real, X_fake])
+            _y_current = np.concatenate([y_real, y_fake])
+
+            # Shuffle randomly
+            X_current, y_current = shuffle(_X_current, _y_current)
 
             # Feed into discriminator and train discriminator
             # Discriminator wants to guess the correct label
+            modelD.trainable = True
             d_loss = modelD.train_on_batch(X_current, y_current)
+            modelD.trainable = False
+
             # Create new noise and train generator
             # Generator wants to generate image but have discrim think its real
-            noise = np.random.uniform(-1, 1, size=(batchSize, 100))
-            y_train_labels = [1] * batchSize
-            g_loss = modelDG.train_on_batch(noise, y_train_labels)
+            noiseG = np.random.uniform(-1, 1, size=(batchSize, 100))
+            y_train_labels = np.array([1] * batchSize)
+            g_loss = modelGD.train_on_batch(noiseG, y_train_labels)
 
-            print("Epoch/Batch: {}/{}, d_loss:{}, g_loss:{}".format(epoch, index, d_loss, g_loss))
+            print("Epoch/Batch: {:>3}/{:3}, d_loss:{:2f}, g_loss:{:2f}".format(epoch, index, d_loss, g_loss))
 
 # Save model
 save = args["save_model"] > 0
