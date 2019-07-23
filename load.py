@@ -1,7 +1,6 @@
 import cv2
 import glob
 import os
-from sklearn.model_selection import train_test_split
 
 
 class Load:
@@ -13,7 +12,4 @@ class Load:
         # Load all images
         X = [cv2.imread(file) for file in glob.glob(pathname + "/images/processed/*.jpg")]
         
-        # Labels (all real)
-        y = [1] * len(X)
-
-        return (X, y)
+        return X
