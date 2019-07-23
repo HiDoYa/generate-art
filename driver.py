@@ -76,7 +76,6 @@ modelGD.compile(loss="binary_crossentropy", optimizer=opt)
 
 # Train (only if not loading model)
 batchSize = 64
-outputTime = 10
 epochs = 1000
 noise_for_images = np.random.uniform(-1, 1, size=(batchSize, 100))
 train = args["load_model"] < 0
@@ -84,10 +83,10 @@ if train:
     for epoch in range(epochs):
         numBatches = int(X.shape[0] / batchSize)
         for index in range(numBatches): 
-            # Output generated images every number of epochs
-            if index % outputTime == 0:
+            # Output generated images every epoch
+            if index == 0:
                 image = all_images(modelG.predict(noise_for_images))
-                cv2.imwrite("images/art/" + str(epoch) + '_' + str(index) + ".jpg", image)
+                cv2.imwrite("images/art/" + str(epoch) + ".jpg", image)
 
                 if not os.path.exists("output"):
                     os.mkdir("output")
@@ -101,8 +100,8 @@ if train:
             # Note: y_current is just a vectors of 1s
             X_real = X[index * batchSize:(index + 1) * batchSize]
             X_fake = modelG.predict_on_batch(noiseD)
-            y_real = [1] * batchSize
-            y_fake = [0] * batchSize
+            y_real = np.random.uniform(0.9, 1, size=batchSize)
+            y_fake = np.random.uniform(0, 0.1, size=batchSize)
 
             # Add X_train and y_train
             _X_current = np.concatenate([X_real, X_fake])
@@ -120,10 +119,10 @@ if train:
             # Create new noise and train generator
             # Generator wants to generate image but have discrim think its real
             noiseG = np.random.uniform(-1, 1, size=(batchSize, 100))
-            y_train_labels = np.array([1] * batchSize)
+            y_train_labels = np.random.uniform(0.9, 1, size=batchSize)
             g_loss = modelGD.train_on_batch(noiseG, y_train_labels)
 
-            print("Epoch/Batch: {:>3}/{:3}, d_loss:{:2f}, g_loss:{:2f}".format(epoch, index, d_loss, g_loss))
+            print("Epoch/Batch: {:>3}/{:<3}, d_loss:{:2f}, g_loss:{:2f}".format(epoch, index, d_loss, g_loss))
 
 # Save model
 save = args["save_model"] > 0
