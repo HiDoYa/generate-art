@@ -53,7 +53,7 @@ X = (X.astype("float32") - 127.5) / 127.5
 # Initialize optimizer and model
 print("Loading model...")
 loadPath = args["load_model"] > 0 or args["train_model"] > 0
-opt = SGD(lr=0.005, momentum=0.9, nesterov=True)
+opt = SGD(lr=0.001, momentum=0.5, nesterov=True)
 modelG = Models.buildGenerator(
     vectSize=100,
     weightsPath=gWeightsPath if loadPath else None)
@@ -75,7 +75,7 @@ modelGD.add(modelD)
 modelGD.compile(loss="binary_crossentropy", optimizer=opt)
 
 # Train (only if not loading model)
-batchSize = 64
+batchSize = 128
 epochs = 1000
 noise_for_images = np.random.uniform(-1, 1, size=(batchSize, 100))
 train = args["load_model"] < 0
