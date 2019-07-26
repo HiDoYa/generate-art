@@ -21,10 +21,7 @@ class Models:
         model.add(Reshape(shape))
         model.add(Activation("relu"))
 
-        model.add(Conv2DTranspose(1024, kernel_size=5, strides=2, padding="same"))
-        model.add(BatchNormalization())
-        model.add(Activation("relu"))
-        
+        # Note: All filter numbers have been cut in half (due to AWS constraints)
         model.add(Conv2DTranspose(512, kernel_size=5, strides=2, padding="same"))
         model.add(BatchNormalization())
         model.add(Activation("relu"))
@@ -34,6 +31,10 @@ class Models:
         model.add(Activation("relu"))
 
         model.add(Conv2DTranspose(128, kernel_size=5, strides=2, padding="same"))
+        model.add(BatchNormalization())
+        model.add(Activation("relu"))
+
+        model.add(Conv2DTranspose(64, kernel_size=5, strides=2, padding="same"))
         model.add(BatchNormalization())
         model.add(Activation("relu"))
 
